@@ -94,6 +94,12 @@
     <a id="backLink" class="back" href="/">トップページへ戻る / Back to Home</a>
   </div>
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.location.hostname === "hamuzon.github.io") {
+        document.getElementById("backLink").href = "https://hamuzon.github.io/password/";
+      }
+    });
+
     if (window.location.hostname === "hamuzon.github.io" && !window.location.pathname.startsWith("/password/")) {
       window.location.replace("/password/");
     }
