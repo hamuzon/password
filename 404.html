@@ -93,5 +93,10 @@
     <p class="subtext">Sorry, Not Found.</p>
     <a id="backLink" class="back" href="/">トップページへ戻る / Back to Home</a>
   </div>
+  <script>
+    if (window.location.hostname === "hamuzon.github.io" && !window.location.pathname.startsWith("/password/")) {
+      window.location.replace("/password/");
+    }
+  </script>
 </body>
 </html>
