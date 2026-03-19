@@ -18,18 +18,19 @@ const countNumber = document.getElementById("countNumber");
 const resultsDiv = document.getElementById("results");
 const saveBtn = document.getElementById("saveBtn");
 const regenBtn = document.getElementById("regenBtn");
+const copyAllBtn = document.getElementById("copyAllBtn");
 
-// スライダーと数値入力を連動させる関数
 function syncRangeAndNumber(rangeEl, numberEl) {
   rangeEl.addEventListener("input", () => {
     numberEl.value = rangeEl.value;
     generateAndDisplay();
   });
+
   numberEl.addEventListener("input", () => {
-    let val = parseInt(numberEl.value);
-    if (isNaN(val)) return;
-    if (val < parseInt(numberEl.min)) val = numberEl.min;
-    if (val > parseInt(numberEl.max)) val = numberEl.max;
+    let val = Number.parseInt(numberEl.value, 10);
+    if (Number.isNaN(val)) return;
+
+    val = Math.min(Number.parseInt(numberEl.max, 10), Math.max(Number.parseInt(numberEl.min, 10), val));
     numberEl.value = val;
     rangeEl.value = val;
     generateAndDisplay();
@@ -39,8 +40,7 @@ function syncRangeAndNumber(rangeEl, numberEl) {
 syncRangeAndNumber(lengthRange, lengthNumber);
 syncRangeAndNumber(countRange, countNumber);
 
-// チェックボックスの変化で再生成
-[chkLower, chkUpper, chkNumber, chkSymbol, chkExcludeAmbiguous].forEach(el => {
+[chkLower, chkUpper, chkNumber, chkSymbol, chkExcludeAmbiguous].forEach((el) => {
   el.addEventListener("change", generateAndDisplay);
 });
 
@@ -48,73 +48,109 @@ function generatePassword(length, charSet) {
   let result = "";
   const array = new Uint32Array(length);
   window.crypto.getRandomValues(array);
-  for (let i = 0; i < length; i++) {
+
+  for (let i = 0; i < length; i += 1) {
     result += charSet.charAt(array[i] % charSet.length);
   }
+
   return result;
+}
+
+function setTemporarySuccess(button, defaultText, successText) {
+  button.textContent = successText;
+  button.classList.add("is-success");
+
+  window.setTimeout(() => {
+    button.textContent = defaultText;
+    button.classList.remove("is-success");
+  }, 1500);
 }
 
 function createCopyButton(text) {
   const btn = document.createElement("button");
   btn.textContent = "コピー";
   btn.className = "copy-btn";
-  btn.addEventListener("click", () => {
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = "コピー完了！";
-      setTimeout(() => (btn.textContent = "コピー"), 1500);
-    });
+  btn.type = "button";
+  btn.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(text);
+    setTemporarySuccess(btn, "コピー", "コピー完了！");
   });
   return btn;
+}
+
+function renderMessage(message) {
+  resultsDiv.innerHTML = "";
+  const empty = document.createElement("div");
+  empty.className = "empty-state";
+  empty.textContent = message;
+  resultsDiv.appendChild(empty);
+}
+
+function getPasswords() {
+  return Array.from(resultsDiv.querySelectorAll(".password-text")).map((el) => el.textContent || "");
 }
 
 function generateAndDisplay() {
   resultsDiv.innerHTML = "";
   let charSet = "";
+
   if (chkLower.checked) charSet += sets.lower;
   if (chkUpper.checked) charSet += sets.upper;
   if (chkNumber.checked) charSet += sets.number;
   if (chkSymbol.checked) charSet += sets.symbol;
 
   if (charSet === "") {
-    resultsDiv.textContent = "最低1種類の文字種を選んでください。";
+    renderMessage("最低1種類の文字種を選んでください。");
     return;
   }
 
   if (chkExcludeAmbiguous.checked) {
     charSet = charSet
       .split("")
-      .filter(c => !sets.ambiguous.includes(c))
+      .filter((char) => !sets.ambiguous.includes(char))
       .join("");
+
     if (charSet.length === 0) {
-      resultsDiv.textContent = "判別しづらい文字を除外しすぎて文字がありません。";
+      renderMessage("判別しづらい文字を除外しすぎて文字がありません。");
       return;
     }
   }
 
-  const length = parseInt(lengthRange.value);
-  const count = parseInt(countRange.value);
+  const length = Number.parseInt(lengthRange.value, 10);
+  const count = Number.parseInt(countRange.value, 10);
 
-  for (let i = 0; i < count; i++) {
-    const pw = generatePassword(length, charSet);
-    const div = document.createElement("div");
-    div.className = "result-item";
+  for (let i = 0; i < count; i += 1) {
+    const password = generatePassword(length, charSet);
+    const item = document.createElement("article");
+    item.className = "result-item";
 
-    const span = document.createElement("span");
-    span.textContent = pw;
+    const text = document.createElement("p");
+    text.className = "password-text";
+    text.textContent = password;
 
-    div.appendChild(span);
-    div.appendChild(createCopyButton(pw));
-    resultsDiv.appendChild(div);
+    item.append(text, createCopyButton(password));
+    resultsDiv.appendChild(item);
   }
 }
 
+copyAllBtn.addEventListener("click", async () => {
+  const passwords = getPasswords();
+  if (passwords.length === 0) {
+    alert("コピーできるパスワードがありません。");
+    return;
+  }
+
+  await navigator.clipboard.writeText(passwords.join("\n"));
+  setTemporarySuccess(copyAllBtn, "すべてコピー", "コピー完了！");
+});
+
 saveBtn.addEventListener("click", () => {
-  const pwElements = resultsDiv.querySelectorAll(".result-item > span");
-  if (pwElements.length === 0) {
+  const passwords = getPasswords();
+  if (passwords.length === 0) {
     alert("パスワードが生成されていません。");
     return;
   }
-  const text = Array.from(pwElements).map(el => el.textContent).join("\n");
+
   const now = new Date();
   const y = now.getFullYear();
   const mo = String(now.getMonth() + 1).padStart(2, "0");
@@ -124,16 +160,14 @@ saveBtn.addEventListener("click", () => {
   const s = String(now.getSeconds()).padStart(2, "0");
   const filename = `password_${y}${mo}${d}${h}${mi}${s}.txt`;
 
-  const blob = new Blob([text], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  const blob = new Blob([passwords.join("\n")], { type: "text/plain" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
 });
 
-// 「再生成」ボタンで生成
 regenBtn.addEventListener("click", generateAndDisplay);
 
-// 最初の生成
 generateAndDisplay();

@@ -3,53 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🔑Password Generator Tool🗝️</title>
+  <title>🔑 Password Generator Tool</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="icon-light.svg" type="image/svg+xml" />
 </head>
 <body>
-  <div id="wrapper">
-    <div class="container">
-      <h1>🔑Password Generator Tool🗝️</h1>
-      <h1>使用は自己責任</h1>
-      <div class="checkbox-group">
-        <label class="checkbox-label" for="chkLower">
-          <input type="checkbox" id="chkLower" checked />英字（小文字）
-        </label>
-        <label class="checkbox-label" for="chkUpper">
-          <input type="checkbox" id="chkUpper" checked />英字（大文字）
-        </label>
-        <label class="checkbox-label" for="chkNumber">
-          <input type="checkbox" id="chkNumber" checked />数字
-        </label>
-        <label class="checkbox-label" for="chkSymbol">
-          <input type="checkbox" id="chkSymbol" />記号 (!?#$%&=~/*-_+@)
-        </label>
-        <label class="checkbox-label" for="chkExcludeAmbiguous">
-          <input type="checkbox" id="chkExcludeAmbiguous" checked />判別しづらい文字 (Ilji1Oo0)を除く
-        </label>
-      </div>
+  <main class="page-shell">
+    <section class="container">
+      <header class="hero">
+        <p class="eyebrow">Responsive UI</p>
+        <h1>🔑 Password Generator Tool</h1>
+        <p class="hero-text">
+          画面サイズに合わせてレイアウトが切り替わる、見やすいレスポンシブ UI のパスワード生成ツールです。
+        </p>
+        <p class="hero-note">使用は自己責任でお願いします。</p>
+      </header>
 
-      <div class="slider-group">
-        <label class="slider-label" for="lengthRange">文字数</label>
-        <input type="range" id="lengthRange" min="8" max="64" value="16" />
-        <input type="number" id="lengthNumber" min="8" max="64" value="16" />
-      </div>
+      <section class="panel" aria-labelledby="settingsHeading">
+        <div class="panel-header">
+          <h2 id="settingsHeading">生成設定</h2>
+          <p>必要な文字種と生成数を選ぶと、下の結果一覧が自動更新されます。</p>
+        </div>
 
-      <div class="slider-group">
-        <label class="slider-label" for="countRange">生成個数</label>
-        <input type="range" id="countRange" min="1" max="20" value="6" />
-        <input type="number" id="countNumber" min="1" max="20" value="6" />
-      </div>
+        <div class="checkbox-group">
+          <label class="checkbox-label" for="chkLower">
+            <input type="checkbox" id="chkLower" checked />
+            <span>英字（小文字）</span>
+          </label>
+          <label class="checkbox-label" for="chkUpper">
+            <input type="checkbox" id="chkUpper" checked />
+            <span>英字（大文字）</span>
+          </label>
+          <label class="checkbox-label" for="chkNumber">
+            <input type="checkbox" id="chkNumber" checked />
+            <span>数字</span>
+          </label>
+          <label class="checkbox-label" for="chkSymbol">
+            <input type="checkbox" id="chkSymbol" />
+            <span>記号 (!?#$%&=~/*-_+@)</span>
+          </label>
+          <label class="checkbox-label full-width" for="chkExcludeAmbiguous">
+            <input type="checkbox" id="chkExcludeAmbiguous" checked />
+            <span>判別しづらい文字 (Ilji1Oo0) を除く</span>
+          </label>
+        </div>
 
-      <div class="results" id="results"></div>
+        <div class="slider-layout">
+          <div class="slider-group">
+            <label class="slider-label" for="lengthRange">文字数</label>
+            <input type="range" id="lengthRange" min="8" max="64" value="16" />
+            <input type="number" id="lengthNumber" min="8" max="64" value="16" />
+          </div>
+
+          <div class="slider-group">
+            <label class="slider-label" for="countRange">生成個数</label>
+            <input type="range" id="countRange" min="1" max="20" value="6" />
+            <input type="number" id="countNumber" min="1" max="20" value="6" />
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="resultsHeading">
+        <div class="panel-header results-header">
+          <div>
+            <h2 id="resultsHeading">生成結果</h2>
+            <p>各パスワードを個別コピーできます。必要に応じてまとめて保存も可能です。</p>
+          </div>
+          <button id="copyAllBtn" class="secondary-btn" type="button">すべてコピー</button>
+        </div>
+
+        <div class="results" id="results" aria-live="polite"></div>
+      </section>
 
       <div class="buttons">
-        <button id="regenBtn">再生成</button>
-        <button id="saveBtn">保存（テキストファイル）</button>
+        <button id="regenBtn" type="button">再生成</button>
+        <button id="saveBtn" type="button">保存（テキストファイル）</button>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>

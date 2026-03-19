@@ -1,186 +1,337 @@
-/* 基本リセットとボックス調整 */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-html, body {
+:root {
+  color-scheme: light;
+  --bg-start: #0f172a;
+  --bg-end: #1d4ed8;
+  --surface: rgb(255 255 255 / 0.94);
+  --surface-strong: #ffffff;
+  --line: #dbe3f0;
+  --text-main: #0f172a;
+  --text-sub: #475569;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: #dbeafe;
+  --success: #16a34a;
+  --shadow: 0 24px 60px rgb(15 23 42 / 0.18);
+}
+
+html,
+body {
   margin: 0;
-  padding: 0;
-  height: 100%;
+  min-height: 100%;
 }
 
-/* FC2広告の影響を防ぐラッパー */
-#wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+body {
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top, rgb(255 255 255 / 0.15), transparent 30%),
+    linear-gradient(135deg, var(--bg-start), var(--bg-end));
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.page-shell {
   min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(135deg, #A0E9D5, #F0F4F8);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #3B2F2F;
+  padding: 32px 16px;
 }
 
-/* メインコンテンツ */
 .container {
-  max-width: 700px;
-  width: 100%;
-  background: #F0F4F8;
-  border-radius: 12px;
-  padding: 24px 30px;
-  box-shadow: 0 5px 20px rgb(58 47 47 / 0.2);
-  display: flex;
-  flex-direction: column;
+  width: min(100%, 1080px);
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }
 
-/* タイトル */
-h1 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  text-align: center;
+.hero {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #3B2F2F;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* チェックボックスグループ */
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+}
+
+.hero-text,
+.hero-note,
+.panel-header p {
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+.hero-note {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+.panel {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.panel + .panel {
+  margin-top: 20px;
+}
+
+.panel-header {
+  margin-bottom: 20px;
+}
+
+.panel-header h2 {
+  margin-bottom: 8px;
+  font-size: 1.3rem;
+}
+
 .checkbox-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
 
-label.checkbox-label {
+.checkbox-label {
   display: flex;
+  gap: 12px;
   align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.checkbox-label:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+  box-shadow: 0 12px 24px rgb(37 99 235 / 0.08);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.checkbox-label span {
   font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-  color: #3B2F2F;
 }
 
-label.checkbox-label input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  margin-right: 10px;
-  cursor: pointer;
+.full-width {
+  grid-column: 1 / -1;
 }
 
-/* スライダー調整 */
+.slider-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
 .slider-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 88px minmax(0, 1fr) 76px;
   gap: 12px;
-  margin-bottom: 24px;
   align-items: center;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
 }
 
 .slider-label {
-  font-weight: 600;
-  color: #3B2F2F;
+  font-weight: 700;
 }
 
 input[type="range"] {
   width: 100%;
-  cursor: pointer;
-  accent-color: #68D391;
+  accent-color: var(--accent);
 }
 
 input[type="number"] {
-  width: 60px;
-  padding: 6px 8px;
-  font-size: 1em;
-  border-radius: 6px;
-  border: 1px solid #68D391;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
   text-align: center;
-  color: #3B2F2F;
+  color: var(--text-main);
+  background: #fff;
 }
 
-/* 結果表示 */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+}
+
 .results {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
-  margin-bottom: 24px;
+}
+
+.result-item,
+.empty-state {
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #eff6ff, #ffffff);
+  padding: 16px;
 }
 
 .result-item {
-  background: #A0E9D5;
-  border: 1px solid #68D391;
-  border-radius: 10px;
-  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 1.1em;
-  user-select: all;
-  word-break: break-word;
-  color: #3B2F2F;
-  box-shadow: 0 2px 8px rgb(58 47 47 / 0.1);
-}
-
-/* コピー・保存・再生成ボタン統一 */
-.buttons {
-  display: flex;
-  justify-content: center; /* 横中央揃え */
   gap: 12px;
-  flex-wrap: wrap; /* 狭い画面で折り返し対応 */
-  margin-bottom: 24px;
+  box-shadow: 0 12px 24px rgb(15 23 42 / 0.06);
 }
 
-.buttons button {
-  background: #68D391;
-  color: #3B2F2F;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+.password-text {
+  margin: 0;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1rem;
   font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgb(104 211 145 / 0.5);
-  transition: background-color 0.3s ease;
-  flex-shrink: 0;
+  line-height: 1.6;
+  word-break: break-all;
 }
 
-.buttons button:hover {
-  background: #5A4238;
-  color: #F0F4F8;
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-sub);
 }
 
-/* コピーボタン */
+.buttons,
+.secondary-btn,
 .copy-btn {
-  background: #68D391;
-  color: #3B2F2F;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-weight: 700;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  flex-shrink: 0;
-  box-shadow: 0 2px 5px rgb(58 47 47 / 0.15);
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
+.buttons {
+  margin-top: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.buttons button,
+.secondary-btn,
+.copy-btn {
+  min-height: 46px;
+  padding: 0 18px;
+}
+
+.buttons button,
+.copy-btn {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 10px 24px rgb(37 99 235 / 0.28);
+}
+
+.secondary-btn {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+.buttons button:hover,
+.secondary-btn:hover,
 .copy-btn:hover {
-  background: #5A4238;
-  color: #F0F4F8;
+  transform: translateY(-1px);
 }
 
-/* スマホ対応 */
-@media (max-width: 600px) {
+.copy-btn.is-success,
+.secondary-btn.is-success {
+  background: #dcfce7;
+  color: var(--success);
+  box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .container {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .results-header,
+  .slider-group {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .results-header {
+    display: grid;
+  }
+
+  .buttons button,
+  .secondary-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .page-shell {
+    padding: 16px 10px;
+  }
+
+  .panel,
+  .container {
+    padding: 18px;
+  }
+
   .checkbox-group,
-  .slider-group,
-  .results {
+  .results,
+  .slider-layout {
     grid-template-columns: 1fr;
   }
 
-  .buttons {
+  .result-item {
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
   }
 
+  .copy-btn,
   .buttons button {
     width: 100%;
   }
