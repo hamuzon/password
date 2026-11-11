@@ -39,30 +39,53 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Inject Google Analytics 4
+      - name: Inject analytics and hostname normalization
         run: |
-          # google*.html を除外し、既存GA4タグがないHTMLに挿入
-          find . -type f -name "*.html" -not -name "google*.html" \
-            -exec sh -c '
-              for file do
-                if ! grep -q "googletagmanager.com/gtag/js" "$file"; then
-                  sed -i "/<head[^>]*>/a\\
-          <!-- Google tag (gtag.js) -->\\
-          <script async src=\"https://www.googletagmanager.com/gtag/js?id=$GA_MEASUREMENT_ID\"></script>\\
-          <script>\\
-          window.dataLayer = window.dataLayer || [];\\
-          function gtag(){dataLayer.push(arguments);}\\
-          gtag(\"js\", new Date());\\
-          gtag(\"config\", \"$GA_MEASUREMENT_ID\");\\
-          </script>" "$file"
-                fi
-              done
-            ' sh {} +
+          : "${GA_MEASUREMENT_ID:?GA_MEASUREMENT_ID is empty}"
+          case "$GA_MEASUREMENT_ID" in
+            G-[A-Z0-9]*) ;;
+            *) echo "Invalid GA_MEASUREMENT_ID: $GA_MEASUREMENT_ID" >&2; exit 1 ;;
+          esac
 
-      - name: Inject FQDN normalization script
-        run: |
-          # 全てのHTMLファイルの<head>直後に挿入
-          find . -type f -name "*.html" -not -name "google*.html" -exec sed -i '/<head[^>]*>/a \  <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>' {} +
+          snippet=$(mktemp)
+          trap 'rm -f "$snippet"' EXIT
+
+          find . -type f -name "*.html" -not -name "google*.html" -not -path "./.git/*" -print0 |
+            while IFS= read -r -d '' file; do
+              : > "$snippet"
+
+              if ! grep -qi "googletagmanager.com/gtag/js" "$file"; then
+                printf '%s\n' \
+                  '<!-- Google tag (gtag.js) -->' \
+                  "<script async src=\"https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}\"></script>" \
+                  '<script>' \
+                  'window.dataLayer = window.dataLayer || [];' \
+                  'function gtag(){dataLayer.push(arguments);}' \
+                  'gtag("js", new Date());' \
+                  "gtag(\"config\", \"${GA_MEASUREMENT_ID}\");" \
+                  '</script>' >> "$snippet"
+              fi
+
+              if ! grep -qi 'hostname.endsWith(".")' "$file"; then
+                printf '%s\n' \
+                  '<script>if(location.hostname.endsWith(".")){const url=new URL(location.href);url.hostname=url.hostname.slice(0,-1);location.replace(url.href);}</script>' \
+                  >> "$snippet"
+              fi
+
+              if [ ! -s "$snippet" ]; then
+                continue
+              fi
+
+              if ! grep -qi '<head[[:space:]>]' "$file"; then
+                echo "No <head> tag found in $file" >&2
+                exit 1
+              fi
+
+              INJECT_SNIPPET="$(cat "$snippet")" perl -0pi -e \
+                's{(<head\b[^>]*>)}{$1 . "\n" . $ENV{INJECT_SNIPPET}}ie or die "Failed to inject scripts into HTML\n"' \
+                "$file"
+              echo "Injected scripts into $file"
+            done
 
       - name: Remove sensitive files from deployment artifact
         run: |
